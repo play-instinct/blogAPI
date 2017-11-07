@@ -27,6 +27,7 @@ router.post('/', jsonParser, (request, resolution) => {
   }
   const item = BlogPosts.create(
   request.body.title, request.body.content, request.body.author);
+  resolution.status(201).json(item);
 });
 
 //update
@@ -35,7 +36,7 @@ router.put('/:id', jsonParser, (request, resolution) => {
   	'id', 'title', 'content', 'author', 'publishDate'];
   for (let i=0; i<requiredFields.length; i++) {
     const field = requiredFields[i];
-    if (!(field in req.body)) {
+    if (!(field in request.body)) {
       console.log(`Not Found`);
     }
   }
@@ -45,11 +46,14 @@ router.put('/:id', jsonParser, (request, resolution) => {
     content: request.body.content,
     author: request.body.author,
   });
+
+  resolution.status(204).json(updatedItem);
 });
 
 //delete
 router.delete('/:id', (request, resolution) => {
   BlogPosts.delete(request.params.id);
+    resolution.status(200).send();
 });
 
 

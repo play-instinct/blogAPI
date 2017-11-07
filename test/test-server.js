@@ -44,10 +44,10 @@ describe('Blog API', function() {
     // at the end of the test. The `chai.request(server).get...` call is asynchronous
     // and returns a Promise, so we just return it.
     return chai.request(app)
-      .get('/blog-posts')
-      .then(function(res) {
-        res.should.have.status(200);
-        res.should.be.json;
+    .get('/blog-posts')
+    .then(function(res) {
+      res.should.have.status(200);
+      res.should.be.json;
 
         // because we create three items on app load
         res.body.length.should.be.at.least(1);
@@ -65,7 +65,7 @@ describe('Blog API', function() {
   //  1. make a POST request with data for a new item
   //  2. inspect response object and prove it has right
   //  status code and that the returned object has an `id`
-it('should add a blog post on POST', function() {
+  it('should add a blog post on POST', function() {
     const newPost = {
       title: 'Lorem ip some',
       content: 'foo foo foo foo',
@@ -74,19 +74,55 @@ it('should add a blog post on POST', function() {
     const expectedKeys = ['id', 'publishDate'].concat(Object.keys(newPost));
 
     return chai.request(app)
-      .post('/blog-posts')
-      .send(newPost)
-      .then(function(res) {
-        res.should.have.status(201);
-        res.should.be.json;
-        res.body.should.be.a('object');
-        res.body.should.have.all.keys(expectedKeys);
-        res.body.title.should.equal(newPost.title);
-        res.body.content.should.equal(newPost.content);
-        res.body.author.should.equal(newPost.author)
-      });
+    .post('/blog-posts')
+    .send(newPost)
+    .then(function(res) {
+      res.should.have.status(201);
+      res.should.be.json;
+      res.body.should.be.a('object');
+      res.body.should.have.all.keys(expectedKeys);
+      res.body.title.should.equal(newPost.title);
+      res.body.content.should.equal(newPost.content);
+      res.body.author.should.equal(newPost.author)
+    });
   });
 
+
+  it('should update blog post on PUT', function() {
+    const updateData = {
+      title: 'Lorem ip some',
+    };
+    return chai.request(app)
+      // first have to get so we have an idea of object to update
+      .get('/blog-posts')
+      .then(function(res) {
+        updateData.id = res.body[0].id;
+        // this will return a promise whose value will be the response
+        // object, which we can inspect in the next `then` back. 
+        return chai.request(app)
+        .put(`/blog-posts/${updateData.id}`)
+        .send(updateData)
+        .then(function(res) {
+          res.should.have.status(204);
+        });
+      })
+      // prove that the PUT request has right status code
+
+    });
+
+
+  it('should delete blog post on delete', function(){
+    return chai.request(app)
+    .get('/blog-posts')
+    .then(function(resolution){
+      return chai.request(app)
+        .delete(`/blog-posts/${resolution.body[1].id}`);
+    })
+    .then(function(resolution){
+      resolution.should.have.status(200)
+    })
+
+  });
 
 });
 
